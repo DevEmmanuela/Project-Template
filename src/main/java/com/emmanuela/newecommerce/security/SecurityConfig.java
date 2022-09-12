@@ -33,16 +33,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().and().csrf().disable();
-        http.authorizeRequests().antMatchers("/login/**",  "/register/**",
-                "/confirmToken/**", "/forgot-password", "/reset-password").permitAll();
+        http.authorizeRequests().antMatchers("/login/**",  "/users/register/**",
+                "/users/confirm-token/**", "/forgot-password", "/reset-password").permitAll();
 
         //change transactionhistory to order history
         http.authorizeRequests().antMatchers(HttpMethod.GET, "/viewUser/**", "/transactionHistory",
                 "/getUserName", "/changePassword").hasAnyAuthority("USER");
 
         //change transfer to make order
-        http.authorizeRequests().antMatchers(HttpMethod.POST, "/transfer/**")
-                .hasAnyAuthority("USER");
+//        http.authorizeRequests().antMatchers(HttpMethod.POST, "/transfer/**")
+//                .hasAnyAuthority("USER");
 
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.authorizeRequests().anyRequest().authenticated();

@@ -2,9 +2,11 @@ package com.emmanuela.newecommerce.services.serviceimpl;
 
 import com.emmanuela.newecommerce.customexceptions.EmailAlreadyExistException;
 import com.emmanuela.newecommerce.customexceptions.PasswordNotMatchException;
+import com.emmanuela.newecommerce.customexceptions.UserNotFoundException;
 import com.emmanuela.newecommerce.dto.UsersDto;
 import com.emmanuela.newecommerce.entities.Users;
 import com.emmanuela.newecommerce.enums.UsersStatus;
+import com.emmanuela.newecommerce.repository.ConfirmationTokenRepository;
 import com.emmanuela.newecommerce.repository.UsersRepository;
 import com.emmanuela.newecommerce.services.UsersService;
 import com.emmanuela.newecommerce.validationtoken.ConfirmationToken;
@@ -26,6 +28,7 @@ public class UsersServiceImpl implements UserDetailsService, UsersService {
     private final String USER_EMAIL_ALREADY_EXISTS_MSG = "Users with email %s already exists!";
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final ConfirmationTokenServiceImpl confirmationTokenService;
+    private final ConfirmationTokenRepository confirmationTokenRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -68,6 +71,19 @@ public class UsersServiceImpl implements UserDetailsService, UsersService {
                 LocalDateTime.now().plusHours(24),
                 users);
         confirmationTokenService.saveConfirmationToken(confirmationToken);
+    }
+
+    @Override
+    public void deleteUnverifiedToken(ConfirmationToken token) {
+        confirmationTokenRepository.delete(token);
+    }
+
+    @Override
+    public void enableUser(String email) {
+        Users users = usersRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+        users.setUsersStatus(UsersStatus.ACTIVE);
+        usersRepository.save(users);
     }
 
 
