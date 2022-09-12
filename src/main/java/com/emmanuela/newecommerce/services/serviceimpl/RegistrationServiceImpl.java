@@ -3,8 +3,8 @@ package com.emmanuela.newecommerce.services.serviceimpl;
 import com.emmanuela.newecommerce.customexceptions.EmailAlreadyConfirmedException;
 import com.emmanuela.newecommerce.customexceptions.TokenNotFoundException;
 import com.emmanuela.newecommerce.customexceptions.UserNotFoundException;
-import com.emmanuela.newecommerce.dto.SendMailDto;
-import com.emmanuela.newecommerce.dto.UsersDto;
+import com.emmanuela.newecommerce.response.SendMailResponse;
+import com.emmanuela.newecommerce.response.UsersResponse;
 import com.emmanuela.newecommerce.entities.Users;
 import com.emmanuela.newecommerce.repository.UsersRepository;
 import com.emmanuela.newecommerce.services.RegistrationService;
@@ -26,11 +26,11 @@ public class RegistrationServiceImpl implements RegistrationService {
 
 
     @Override
-    public String registerUser(UsersDto usersDto) {
-        String token = usersService.registerUser(usersDto);
+    public String registerUser(UsersResponse usersResponse) {
+        String token = usersService.registerUser(usersResponse);
 
         String link = Constant.EMAIL_VERIFICATION_LINK + token;
-        sendMailVerificationLink(usersDto.getFirstname(), usersDto.getEmail(), link);
+        sendMailVerificationLink(usersResponse.getFirstname(), usersResponse.getEmail(), link);
         return "please check your email for account activation link";
     }
 
@@ -71,7 +71,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     public void sendMailVerificationLink(String name, String email, String link) {
         String subject = "Email verification";
         String body = "Click the link below to verify your email \n" + link;
-        SendMailDto sendMailDto = new SendMailDto(email,name, subject, body);
-        mailService.sendMail(sendMailDto);
+        SendMailResponse sendMailResponse = new SendMailResponse(email,name, subject, body);
+        mailService.sendMail(sendMailResponse);
     }
 }

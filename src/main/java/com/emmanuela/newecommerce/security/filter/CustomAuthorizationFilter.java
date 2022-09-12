@@ -1,6 +1,6 @@
 package com.emmanuela.newecommerce.security.filter;
 
-import com.emmanuela.newecommerce.dto.ErrorResponseDto;
+import com.emmanuela.newecommerce.response.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -71,14 +71,14 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
     //write a method to capture the error that might occur
     public void writeErrorResponse(String errorMsg, HttpServletResponse response, HttpStatus httpStatus){
         try{
-            ErrorResponseDto errorResponseDto = new ErrorResponseDto(httpStatus);
-            errorResponseDto.setMessage(errorMsg);
+            ErrorResponse errorResponse = new ErrorResponse(httpStatus);
+            errorResponse.setMessage(errorMsg);
             response.setStatus(httpStatus.value());
             response.setContentType("application/json");
 
             ObjectMapper mapper = new ObjectMapper();
             PrintWriter out = response.getWriter();
-            out.write(mapper.writeValueAsString(errorResponseDto));
+            out.write(mapper.writeValueAsString(errorResponse));
 
         }catch (Exception e){
             LOGGER.error("Unknown error", e);

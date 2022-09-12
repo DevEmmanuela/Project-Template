@@ -1,7 +1,7 @@
 package com.emmanuela.newecommerce.services.serviceimpl;
 
 import com.emmanuela.newecommerce.customexceptions.FailedMailException;
-import com.emmanuela.newecommerce.dto.SendMailDto;
+import com.emmanuela.newecommerce.response.SendMailResponse;
 import com.emmanuela.newecommerce.services.MailService;
 import lombok.AllArgsConstructor;
 import org.springframework.mail.MailException;
@@ -15,12 +15,12 @@ public class MailServiceImpl implements MailService {
     private final JavaMailSender javaMailSender;
     private final String FOOTER_TEMPLATE = "\n\n Regards\n Activity Tracker Team!";
     @Override
-    public String sendMail(SendMailDto sendMailDto) throws MailException {
+    public String sendMail(SendMailResponse sendMailResponse) throws MailException {
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
 
-        simpleMailMessage.setTo(sendMailDto.getTo());
-        simpleMailMessage.setSubject(sendMailDto.getSubject());
-        simpleMailMessage.setText("Hi, " + sendMailDto.getName() + "\n\n" + sendMailDto.getBody() + FOOTER_TEMPLATE);
+        simpleMailMessage.setTo(sendMailResponse.getTo());
+        simpleMailMessage.setSubject(sendMailResponse.getSubject());
+        simpleMailMessage.setText("Hi, " + sendMailResponse.getName() + "\n\n" + sendMailResponse.getBody() + FOOTER_TEMPLATE);
 
         try{
             javaMailSender.send(simpleMailMessage);

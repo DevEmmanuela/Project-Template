@@ -1,4 +1,4 @@
-package com.emmanuela.newecommerce.dto;
+package com.emmanuela.newecommerce.response;
 
 import lombok.*;
 
@@ -6,7 +6,7 @@ import lombok.*;
 @Setter
 @Builder
 @AllArgsConstructor
-public class UsersDto {
+public class UsersResponse {
     private String firstname;
     private String lastname;
     private String email;

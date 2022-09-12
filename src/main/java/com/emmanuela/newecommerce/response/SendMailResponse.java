@@ -1,4 +1,4 @@
-package com.emmanuela.newecommerce.dto;
+package com.emmanuela.newecommerce.response;
 
 import lombok.*;
 
@@ -6,7 +6,7 @@ import lombok.*;
 @Getter
 @AllArgsConstructor
 @RequiredArgsConstructor
-public class SendMailDto {
+public class SendMailResponse {
     private String to;
     private String name;
     private String subject;
