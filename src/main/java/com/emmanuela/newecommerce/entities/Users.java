@@ -21,6 +21,7 @@ public class Users extends BaseClass{
     private String password;
     private String confirmPassword;
     private String role;
+    private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
     private UsersStatus usersStatus;

@@ -1,4 +1,4 @@
-package com.emmanuela.newecommerce.response;
+package com.emmanuela.newecommerce.request;
 
 import lombok.*;
 
@@ -6,9 +6,11 @@ import lombok.*;
 @Setter
 @Builder
 @AllArgsConstructor
-public class UsersResponse {
+public class UsersRequest {
     private String firstname;
     private String lastname;
     private String email;
+    private String password;
+    private String confirmPassword;
     private String phoneNumber;
 }

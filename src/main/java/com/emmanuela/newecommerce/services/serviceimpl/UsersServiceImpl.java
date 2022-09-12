@@ -3,16 +3,18 @@ package com.emmanuela.newecommerce.services.serviceimpl;
 import com.emmanuela.newecommerce.customexceptions.EmailAlreadyExistException;
 import com.emmanuela.newecommerce.customexceptions.PasswordNotMatchException;
 import com.emmanuela.newecommerce.customexceptions.UserNotFoundException;
-import com.emmanuela.newecommerce.response.UsersResponse;
+import com.emmanuela.newecommerce.request.UsersRequest;
 import com.emmanuela.newecommerce.entities.Users;
 import com.emmanuela.newecommerce.enums.UsersStatus;
 import com.emmanuela.newecommerce.repository.ConfirmationTokenRepository;
 import com.emmanuela.newecommerce.repository.UsersRepository;
+import com.emmanuela.newecommerce.response.UsersResponse;
 import com.emmanuela.newecommerce.services.UsersService;
 import com.emmanuela.newecommerce.validationtoken.ConfirmationToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -51,25 +53,26 @@ public class UsersServiceImpl implements UserDetailsService, UsersService {
     }
 
     @Override
-    public String registerUser(UsersResponse usersResponse) {
-        if(!usersResponse.getPassword().equals(usersResponse.getConfirmPassword())){
+    public String registerUser(UsersRequest usersRequest) {
+        if(!usersRequest.getPassword().equals(usersRequest.getConfirmPassword())){
             throw new PasswordNotMatchException("password does not match");
         }
-        Optional<Users> users = usersRepository.findByEmail(usersResponse.getEmail());
+        Optional<Users> users = usersRepository.findByEmail(usersRequest.getEmail());
 
         if(users.isPresent()){
             throw new EmailAlreadyExistException(
-                    String.format(USER_EMAIL_ALREADY_EXISTS_MSG, usersResponse.getEmail()));
+                    String.format(USER_EMAIL_ALREADY_EXISTS_MSG, usersRequest.getEmail()));
         }
         Users users1 = new Users();
-        users1.setFirstname(usersResponse.getFirstname());
-        users1.setLastname(usersResponse.getLastname());
-        users1.setEmail(usersResponse.getEmail());
-        users1.setPassword(bCryptPasswordEncoder.encode(usersResponse.getPassword()));
-        users1.setConfirmPassword(bCryptPasswordEncoder.encode(usersResponse.getConfirmPassword()));
+        users1.setFirstname(usersRequest.getFirstname());
+        users1.setLastname(usersRequest.getLastname());
+        users1.setEmail(usersRequest.getEmail());
+        users1.setPassword(bCryptPasswordEncoder.encode(usersRequest.getPassword()));
+        users1.setConfirmPassword(bCryptPasswordEncoder.encode(usersRequest.getConfirmPassword()));
         users1.setRole("USER");
         users1.setUsersStatus(UsersStatus.INACTIVE);
         users1.setCreatedAt(LocalDateTime.now());
+        users1.setPhoneNumber(usersRequest.getPhoneNumber());
 
         String token = UUID.randomUUID().toString();
         saveToken(token, users1);
@@ -98,6 +101,26 @@ public class UsersServiceImpl implements UserDetailsService, UsersService {
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
         users.setUsersStatus(UsersStatus.ACTIVE);
         usersRepository.save(users);
+    }
+
+    @Override
+    public UsersResponse getUser() {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Users user1 = usersRepository.findUsersByEmail(user.getUsername());
+        UsersResponse usersResponse = UsersResponse.builder()
+                .firstname(user1.getFirstname())
+                .lastname(user1.getLastname())
+                .email(user1.getEmail())
+                .phoneNumber(user1.getPhoneNumber())
+                .build();
+        return usersResponse;
+    }
+
+    @Override
+    public String getUsername() {
+        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+        Users users = usersRepository.findUsersByEmail(userName);
+        return "Hi, " + users.getFirstname();
     }
 
 

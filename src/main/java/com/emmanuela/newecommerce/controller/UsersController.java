@@ -2,9 +2,11 @@ package com.emmanuela.newecommerce.controller;
 
 import com.emmanuela.newecommerce.request.LoginRequest;
 import com.emmanuela.newecommerce.response.LoginResponse;
+import com.emmanuela.newecommerce.request.UsersRequest;
 import com.emmanuela.newecommerce.response.UsersResponse;
 import com.emmanuela.newecommerce.services.serviceimpl.LoginServiceImpl;
 import com.emmanuela.newecommerce.services.serviceimpl.RegistrationServiceImpl;
+import com.emmanuela.newecommerce.services.serviceimpl.UsersServiceImpl;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -21,10 +23,11 @@ public class UsersController {
 
     private final RegistrationServiceImpl registrationService;
     private final LoginServiceImpl loginService;
+    private final UsersServiceImpl usersService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@Valid @RequestBody UsersResponse usersResponse){
-        return new ResponseEntity<>(registrationService.registerUser(usersResponse), HttpStatus.OK);
+    public ResponseEntity<String> register(@Valid @RequestBody UsersRequest usersRequest){
+        return new ResponseEntity<>(registrationService.registerUser(usersRequest), HttpStatus.OK);
     }
     @GetMapping("/confirm-token")
     public ResponseEntity<String> confirmToken(@RequestParam("token") String token){
@@ -34,5 +37,15 @@ public class UsersController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest){
         return new ResponseEntity<>( new LoginResponse(loginService.login(loginRequest)), HttpStatus.OK);
+    }
+
+    @GetMapping("/get-user")
+    public ResponseEntity<UsersResponse> getUser(){
+        return new ResponseEntity<>(usersService.getUser(), HttpStatus.OK);
+    }
+
+    @GetMapping("/get-username")
+    public ResponseEntity<String> getUsername(){
+        return new ResponseEntity<>(usersService.getUsername(), HttpStatus.OK);
     }
 }

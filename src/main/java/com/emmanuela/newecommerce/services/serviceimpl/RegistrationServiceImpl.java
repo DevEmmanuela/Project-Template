@@ -4,7 +4,7 @@ import com.emmanuela.newecommerce.customexceptions.EmailAlreadyConfirmedExceptio
 import com.emmanuela.newecommerce.customexceptions.TokenNotFoundException;
 import com.emmanuela.newecommerce.customexceptions.UserNotFoundException;
 import com.emmanuela.newecommerce.response.SendMailResponse;
-import com.emmanuela.newecommerce.response.UsersResponse;
+import com.emmanuela.newecommerce.request.UsersRequest;
 import com.emmanuela.newecommerce.entities.Users;
 import com.emmanuela.newecommerce.repository.UsersRepository;
 import com.emmanuela.newecommerce.services.RegistrationService;
@@ -26,11 +26,11 @@ public class RegistrationServiceImpl implements RegistrationService {
 
 
     @Override
-    public String registerUser(UsersResponse usersResponse) {
-        String token = usersService.registerUser(usersResponse);
+    public String registerUser(UsersRequest usersRequest) {
+        String token = usersService.registerUser(usersRequest);
 
         String link = Constant.EMAIL_VERIFICATION_LINK + token;
-        sendMailVerificationLink(usersResponse.getFirstname(), usersResponse.getEmail(), link);
+        sendMailVerificationLink(usersRequest.getFirstname(), usersRequest.getEmail(), link);
         return "please check your email for account activation link";
     }
 

@@ -36,9 +36,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests().antMatchers("/users/login/**",  "/users/register/**",
                 "/users/confirm-token/**", "/users/forgot-password", "/users/reset-password").permitAll();
 
-        //change transactionhistory to order history
-        http.authorizeRequests().antMatchers(HttpMethod.GET, "/viewUser/**", "/transactionHistory",
-                "/getUserName", "/changePassword").hasAnyAuthority("USER");
+
+        http.authorizeRequests().antMatchers(HttpMethod.GET, "/users/get-user/**",
+                "/users/get-username", "/changePassword").hasAnyAuthority("USER");
 
         //change transfer to make order
 //        http.authorizeRequests().antMatchers(HttpMethod.POST, "/transfer/**")
