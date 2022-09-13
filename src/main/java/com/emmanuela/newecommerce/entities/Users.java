@@ -6,6 +6,7 @@ import lombok.*;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.validation.constraints.Size;
 
 @Getter
 @Setter
@@ -18,7 +19,9 @@ public class Users extends BaseClass{
     private String firstname;
     private String lastname;
     private String email;
+    @Size(min = 8)
     private String password;
+    @Size(min = 8)
     private String confirmPassword;
     private String role;
     private String phoneNumber;

@@ -4,9 +4,12 @@ import com.emmanuela.newecommerce.customexceptions.UserNotFoundException;
 import com.emmanuela.newecommerce.entities.Users;
 import com.emmanuela.newecommerce.enums.UsersStatus;
 import com.emmanuela.newecommerce.repository.UsersRepository;
+import com.emmanuela.newecommerce.request.ForgotPasswordRequest;
 import com.emmanuela.newecommerce.request.LoginRequest;
+import com.emmanuela.newecommerce.response.SendMailResponse;
 import com.emmanuela.newecommerce.security.filter.JwtUtils;
 import com.emmanuela.newecommerce.services.LoginService;
+import com.emmanuela.newecommerce.util.Constant;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +28,7 @@ public class LoginServiceImpl implements LoginService {
     private final AuthenticationManager authenticationManager;
     private final UsersServiceImpl usersService;
     private final JwtUtils jwtUtils;
+    private final MailServiceImpl mailService;
     @Override
     public String login(LoginRequest loginRequest) {
         Users users = usersRepository.findByEmail(loginRequest.getEmail())
@@ -44,4 +48,26 @@ public class LoginServiceImpl implements LoginService {
         final UserDetails userDetails = usersService.loadUserByUsername(loginRequest.getEmail());
         return jwtUtils.generateToken(userDetails);
     }
+    @Override
+    public String generateResetToken(ForgotPasswordRequest forgotPasswordRequest) {
+        String email = forgotPasswordRequest.getEmail();
+        Users users = usersRepository.findUsersByEmail(email);
+        if(users == null){
+            throw new UsernameNotFoundException("User not found");
+        }
+
+        String token = jwtUtils.generatePasswordResetToken(email);
+        sendPasswordResetEmail(users, token);
+        return "check your mail to reset your password";
+    }
+    private void sendPasswordResetEmail(Users users, String url) {
+        String subject = "Reset your password";
+        String senderName = users.getLastname() ;
+        String mailContent = "\n" + " Please click on the link below to reset your password \n";
+        mailContent += Constant.RESET_PASSWORD_LINK + url;
+
+        SendMailResponse sendMailResponse = new SendMailResponse(users.getEmail(), senderName, subject, mailContent);
+        mailService.sendMail(sendMailResponse);
+    }
+
 }
