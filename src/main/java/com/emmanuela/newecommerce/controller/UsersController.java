@@ -2,6 +2,7 @@ package com.emmanuela.newecommerce.controller;
 
 import com.emmanuela.newecommerce.request.ForgotPasswordRequest;
 import com.emmanuela.newecommerce.request.LoginRequest;
+import com.emmanuela.newecommerce.request.ResetPasswordRequest;
 import com.emmanuela.newecommerce.response.LoginResponse;
 import com.emmanuela.newecommerce.request.UsersRequest;
 import com.emmanuela.newecommerce.response.UsersResponse;
@@ -53,5 +54,11 @@ public class UsersController {
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest){
         return new ResponseEntity<>(loginService.generateResetToken(forgotPasswordRequest), HttpStatus.OK);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestParam ("token") String token,
+                                                @RequestBody ResetPasswordRequest resetPasswordRequest){
+        return new ResponseEntity<>(loginService.resetPassword(resetPasswordRequest, token), HttpStatus.OK);
     }
 }

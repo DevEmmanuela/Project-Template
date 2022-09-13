@@ -1,11 +1,13 @@
 package com.emmanuela.newecommerce.services.serviceimpl;
 
+import com.emmanuela.newecommerce.customexceptions.PasswordNotMatchException;
 import com.emmanuela.newecommerce.customexceptions.UserNotFoundException;
 import com.emmanuela.newecommerce.entities.Users;
 import com.emmanuela.newecommerce.enums.UsersStatus;
 import com.emmanuela.newecommerce.repository.UsersRepository;
 import com.emmanuela.newecommerce.request.ForgotPasswordRequest;
 import com.emmanuela.newecommerce.request.LoginRequest;
+import com.emmanuela.newecommerce.request.ResetPasswordRequest;
 import com.emmanuela.newecommerce.response.SendMailResponse;
 import com.emmanuela.newecommerce.security.filter.JwtUtils;
 import com.emmanuela.newecommerce.services.LoginService;
@@ -18,6 +20,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -29,6 +32,7 @@ public class LoginServiceImpl implements LoginService {
     private final UsersServiceImpl usersService;
     private final JwtUtils jwtUtils;
     private final MailServiceImpl mailService;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
     @Override
     public String login(LoginRequest loginRequest) {
         Users users = usersRepository.findByEmail(loginRequest.getEmail())
@@ -63,11 +67,29 @@ public class LoginServiceImpl implements LoginService {
     private void sendPasswordResetEmail(Users users, String url) {
         String subject = "Reset your password";
         String senderName = users.getLastname() ;
-        String mailContent = "\n" + " Please click on the link below to reset your password \n";
+        String mailContent = "Please click on the link below to reset your password \n";
         mailContent += Constant.RESET_PASSWORD_LINK + url;
 
         SendMailResponse sendMailResponse = new SendMailResponse(users.getEmail(), senderName, subject, mailContent);
         mailService.sendMail(sendMailResponse);
     }
+
+    @Override
+    public String resetPassword(ResetPasswordRequest resetPasswordRequest, String token) {
+        if(!resetPasswordRequest.getNewPassword().equals(resetPasswordRequest.getConfirmPassword())){
+            throw new PasswordNotMatchException("Password does not match");
+        }
+
+        String email = jwtUtils.extractUsername(token);
+        Users users = usersRepository.findUsersByEmail(email);
+        if(users == null){
+            throw new UserNotFoundException("User not found");
+        }
+        users.setPassword(bCryptPasswordEncoder.encode(resetPasswordRequest.getNewPassword()));
+        usersRepository.save(users);
+        return "Password reset successfully";
+    }
+
+
 
 }
