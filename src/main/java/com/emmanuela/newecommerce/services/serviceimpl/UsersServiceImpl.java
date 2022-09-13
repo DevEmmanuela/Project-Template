@@ -47,7 +47,6 @@ public class UsersServiceImpl implements UserDetailsService, UsersService {
             throw new UsernameNotFoundException("User not found");
         }
         else{
-            log.info("User found");
             return new User(users.getEmail(), users.getPassword(), Collections.singleton(authority));
         }
     }

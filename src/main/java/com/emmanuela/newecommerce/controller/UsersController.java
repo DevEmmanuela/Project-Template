@@ -1,10 +1,7 @@
 package com.emmanuela.newecommerce.controller;
 
-import com.emmanuela.newecommerce.request.ForgotPasswordRequest;
-import com.emmanuela.newecommerce.request.LoginRequest;
-import com.emmanuela.newecommerce.request.ResetPasswordRequest;
+import com.emmanuela.newecommerce.request.*;
 import com.emmanuela.newecommerce.response.LoginResponse;
-import com.emmanuela.newecommerce.request.UsersRequest;
 import com.emmanuela.newecommerce.response.UsersResponse;
 import com.emmanuela.newecommerce.services.serviceimpl.LoginServiceImpl;
 import com.emmanuela.newecommerce.services.serviceimpl.RegistrationServiceImpl;
@@ -60,5 +57,10 @@ public class UsersController {
     public ResponseEntity<String> resetPassword(@RequestParam ("token") String token,
                                                 @RequestBody ResetPasswordRequest resetPasswordRequest){
         return new ResponseEntity<>(loginService.resetPassword(resetPasswordRequest, token), HttpStatus.OK);
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest){
+        return new ResponseEntity<>(loginService.changePassword(changePasswordRequest), HttpStatus.OK);
     }
 }

@@ -1,10 +1,12 @@
 package com.emmanuela.newecommerce.services.serviceimpl;
 
+import com.emmanuela.newecommerce.customexceptions.InvalidCredentialsException;
 import com.emmanuela.newecommerce.customexceptions.PasswordNotMatchException;
 import com.emmanuela.newecommerce.customexceptions.UserNotFoundException;
 import com.emmanuela.newecommerce.entities.Users;
 import com.emmanuela.newecommerce.enums.UsersStatus;
 import com.emmanuela.newecommerce.repository.UsersRepository;
+import com.emmanuela.newecommerce.request.ChangePasswordRequest;
 import com.emmanuela.newecommerce.request.ForgotPasswordRequest;
 import com.emmanuela.newecommerce.request.LoginRequest;
 import com.emmanuela.newecommerce.request.ResetPasswordRequest;
@@ -18,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -46,7 +49,7 @@ public class LoginServiceImpl implements LoginService {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken
                     (loginRequest.getEmail(), loginRequest.getPassword()));
         }catch(BadCredentialsException ex){
-            throw new UsernameNotFoundException("Invalid Credential");
+            throw new InvalidCredentialsException(ex.getMessage());
         }
 
         final UserDetails userDetails = usersService.loadUserByUsername(loginRequest.getEmail());
@@ -90,6 +93,29 @@ public class LoginServiceImpl implements LoginService {
         return "Password reset successfully";
     }
 
+    @Override
+    public String changePassword(ChangePasswordRequest changePasswordRequest) {
+        if(!changePasswordRequest.getNewPassword().equals(changePasswordRequest.getConfirmPassword())){
+            throw new PasswordNotMatchException("Password does not match");
+        }
+        String loggedInUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        Users users = usersRepository.findUsersByEmail(loggedInUser);
+        if(users == null){
+            throw new UserNotFoundException("User not found");
+        }
+
+        boolean matchPasswordWithOldPassword = bCryptPasswordEncoder.matches(
+                changePasswordRequest.getOldPassword(), users.getPassword()
+        );
+
+        if(!matchPasswordWithOldPassword){
+            throw new PasswordNotMatchException("Password does not match");
+        }
+
+        users.setPassword(bCryptPasswordEncoder.encode(changePasswordRequest.getNewPassword()));
+        usersRepository.save(users);
+        return "Password changed successfully";
+    }
 
 
 }

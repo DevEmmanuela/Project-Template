@@ -58,4 +58,12 @@ public class GlobalErrorHandler {
         errorResponse.setDebugMessage("Email Already Confirmed");
         return new ResponseEntity<>(errorResponse, HttpStatus.OK);
     }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidCredential(final InvalidCredentialsException ex){
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setMessage(ex.getMessage());
+        errorResponse.setDebugMessage("Invalid credentials");
+        return new ResponseEntity<>(errorResponse, HttpStatus.OK);
+    }
 }
