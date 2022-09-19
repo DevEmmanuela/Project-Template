@@ -1,1 +1,1 @@
-# Activity_Tracker_API
+# Project Template
