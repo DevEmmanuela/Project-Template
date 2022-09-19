@@ -3,16 +3,19 @@ package com.emmanuela.newecommerce.services.serviceimpl;
 import com.emmanuela.newecommerce.customexceptions.EmailAlreadyExistException;
 import com.emmanuela.newecommerce.customexceptions.PasswordNotMatchException;
 import com.emmanuela.newecommerce.customexceptions.UserNotFoundException;
+import com.emmanuela.newecommerce.enums.AuthenticationProvider;
 import com.emmanuela.newecommerce.request.UsersRequest;
 import com.emmanuela.newecommerce.entities.Users;
 import com.emmanuela.newecommerce.enums.UsersStatus;
 import com.emmanuela.newecommerce.repository.ConfirmationTokenRepository;
 import com.emmanuela.newecommerce.repository.UsersRepository;
 import com.emmanuela.newecommerce.response.UsersResponse;
+import com.emmanuela.newecommerce.security.oauth.CustomOAuth2User;
 import com.emmanuela.newecommerce.services.UsersService;
 import com.emmanuela.newecommerce.validationtoken.ConfirmationToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
@@ -122,5 +125,39 @@ public class UsersServiceImpl implements UserDetailsService, UsersService {
         return "Hi, " + users.getFirstname();
     }
 
+    @Override
+    public void createOAuthUser(CustomOAuth2User oAuth2User, Authentication authentication) {
+        Users userExist = usersRepository.findUsersByEmail(oAuth2User.getEmail());
+        String[] result = oAuth2User.getName().split(" ");
+        String lastName = result[result.length-1];
+
+        if(userExist == null){
+            Users newOauthUser = new Users();
+            newOauthUser.setFirstname(result[0]);
+            newOauthUser.setLastname(lastName);
+            newOauthUser.setEmail(oAuth2User.getEmail());
+            newOauthUser.setAuthenticationProvider(AuthenticationProvider.GOOGLE);
+            newOauthUser.setRole("USER");
+            newOauthUser.setPassword(bCryptPasswordEncoder.encode(oAuth2User.getName()));
+            newOauthUser.setConfirmPassword(bCryptPasswordEncoder.encode(oAuth2User.getName()));
+            newOauthUser.setUsersStatus(UsersStatus.ACTIVE);
+            newOauthUser.setCreatedAt(LocalDateTime.now());
+
+            usersRepository.save(newOauthUser);
+        }
+    }
+
+    @Override
+    public void updateOAuth(Users users, CustomOAuth2User oAuth2User, Authentication authentication) {
+
+        String[] result = oAuth2User.getName().split(" ");
+        String lastName = result[result.length-1];
+
+        users.setFirstname(result[0]);
+        users.setLastname(lastName);
+        users.setAuthenticationProvider(AuthenticationProvider.GOOGLE);
+
+        usersRepository.save(users);
+    }
 
 }

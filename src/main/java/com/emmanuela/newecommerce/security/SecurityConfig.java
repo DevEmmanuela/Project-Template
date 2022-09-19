@@ -2,6 +2,8 @@ package com.emmanuela.newecommerce.security;
 
 
 import com.emmanuela.newecommerce.security.filter.CustomAuthorizationFilter;
+import com.emmanuela.newecommerce.security.oauth.CustomOAuth2UserService;
+import com.emmanuela.newecommerce.security.oauth.OAuth2LoginSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +26,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final UserDetailsService userDetailsService;
     private final CustomAuthorizationFilter customAuthorizationFilter;
+    private final CustomOAuth2UserService oAuth2UserService;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -43,7 +47,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .hasAnyAuthority("USER");
 
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        http.authorizeRequests().anyRequest().authenticated();
+        http.authorizeRequests().anyRequest()
+                .authenticated()
+                .and()
+                .formLogin().permitAll()
+                .and()
+                .oauth2Login()
+                .loginPage("/oauth2/authorization/google")
+                .userInfoEndpoint()
+                .userService(oAuth2UserService)
+                .and()
+                .successHandler(oAuth2LoginSuccessHandler);
+
         http.addFilterBefore(customAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
 
     }
